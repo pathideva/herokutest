@@ -46,17 +46,6 @@ module.exports = {
         var name = req.params.name;
         var ti = req.params.timeinterval;
 
-        /*var savedata = new Model({
-            'request': query,
-            'time': Math.floor(Date.now() / 1000) // Time of save the data in unix timestamp format
-        }).save(function(err, result) {
-            if (err) throw err;
-
-            if(result) {
-                res.json(result)
-            }
-        })*/
-
         var savedata = new ConnModel({
                 'name': name,
                 'client': { 
