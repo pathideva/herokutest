@@ -10,6 +10,12 @@ var redis = require('kue/node_modules/redis');
 var express = require("express");
 var app = express();
 
+var conf = require("./config.js");
+
+const SYNC_JOB = 'minute_sync';
+const QUE_UPDATE_JOB = 'update_queue';
+const SCHEDULE_FUNC = 'schedule_run';
+
 // then access the current Queue
 // var jobs = kue.createQueue({
 //     prefix: 'h'
@@ -22,9 +28,18 @@ var app = express();
 //     });
 var jobs = kue.createQueue();
 
-jobs.process('minute_tasks', function(job, done) { 
+jobs.process(SYNC_JOB, function(job, done) { 
     console.log('Worker job running.'); 
     console.log(job.data);
+    done();
+});
+
+//queue update job
+jobs.process(QUE_UPDATE_JOB, function(job, done) { 
+    console.log('Updating queue ...'); 
+    console.log(job.data);
+    que.load_queue();
+    console.log('Updating queue done.'); 
     done();
 });
 
@@ -33,7 +48,8 @@ module.exports = {
     initSchedule : function() { 
 
         //load queues
-        que.load_queue();
+        //que.load_queue();
+        createJob(QUE_UPDATE_JOB, 'db');
 
         //set schedule with agenda
         var mongoConnectionString = 
@@ -44,24 +60,25 @@ module.exports = {
 
         var agenda = new Agenda({db: {address: mongoConnectionString}});
 
-        agenda.define('minute_schedule', function(job, done) {
+        agenda.define(SCHEDULE_FUNC, function(job, done) {
             var ti = datetime.create();
             var obj = cache.get('minute-queue');
+            //get queue set by db
+            try{
+                var data2 = cache.get(conf.QUEUE_MEMCACH, true);
+                var obj2 = JSON.parse(data2);
+                console.log(obj2[0].client.url);
+            }
+            catch (err){
+                console.log("mem queue not set");
+            }
 
             //var obj = JSON.parse(data); 
             for(var i = 0; i < obj.length; i++) {
                 console.log(obj[i].name);
                 var data = '{ name:"' + obj[i].name + ' ", time : "10"}';
                 
-                var job = jobs.create('minute_tasks', data);
-                job.on('complete', function(){
-                    console.log("Job complete");
-                }).on('failed', function(){
-                    console.log("Job failed");
-                }).on('progress', function(progress){
-                    console.log('job #' + job.id + ' ' + progress + '% complete');
-                });                
-                job.save();
+                createJob(SYNC_JOB, data);
 
             }
             console.log('test agenda ' +  ti.format('m/d/Y H:M:S'));
@@ -72,7 +89,7 @@ module.exports = {
             //agenda.every('1 minutes', 'logme');
             
             // Alternatively, you could also do:
-            agenda.every('*/1 * * * *', 'minute_schedule');
+            agenda.every('*/1 * * * *', SCHEDULE_FUNC);
             
             agenda.start();
         });
@@ -83,3 +100,15 @@ module.exports = {
 
    
 };
+
+function createJob(name, data){
+    var job = jobs.create(name, data);
+    job.on('complete', function(){
+        console.log(name + " job complete");
+    }).on('failed', function(){
+        console.log(name + " job failed");
+    }).on('progress', function(progress){
+        console.log(name +' job #' + job.id + ' ' + progress + '% complete');
+    });                
+    job.save();
+}

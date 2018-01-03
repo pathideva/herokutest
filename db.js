@@ -1,4 +1,7 @@
 var mongoose = require('mongoose');
+var cache = require('memory-cache');
+var conf = require("./config.js");
+
 var Schema = mongoose.Schema;
 
 var schemaName = new Schema({
@@ -112,12 +115,29 @@ module.exports = {
             if (err) throw err;
             if (result) {
                 //res.json(result)
-                res.end(JSON.stringify(result));  
+                res.send(JSON.stringify(result));  
                 //var obj = JSON.parse(JSON.stringify(result));
             } else {
                 res.send(JSON.stringify({
                     error : 'Error'
                 }))
+            }
+        })
+    },
+
+    get_connections : function(resjson) {
+        
+        ConnModel.find({}).lean().exec(function(err, result) {
+            if (err) throw err;
+            if (result) {
+                
+                resjson = JSON.stringify(result);  
+                //var obj = JSON.parse(JSON.stringify(result));
+                cache.put(conf.QUEUE_MEMCACH, resjson);
+            } else {
+                resjson = JSON.stringify({
+                    error : 'Error'
+                });
             }
         })
     }

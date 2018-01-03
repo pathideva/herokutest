@@ -1,0 +1,1 @@
+const QUEUE_MEMCACH = "connector-list";

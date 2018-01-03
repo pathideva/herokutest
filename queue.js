@@ -7,10 +7,10 @@ module.exports = {
 
         //get connections from db
         var res;
-        //db.find_connection_all(null, res);  
+        db.get_connections(res);  
 
         //cache JSON
-        var str = '{ "name": "connector 1", "timeinterval": 10 }';
+        var str =  '{ "name": "connector 1", "timeinterval": 10 }';
         var str2 = '{ "name": "connector 2", "timeinterval": 5 }';
         var str3 = '{ "name": "connector 3", "timeinterval": 10 }';
         var str4 = '{ "name": "connector 4", "timeinterval": 5 }';
