@@ -77,6 +77,18 @@ module.exports = {
         })
     },
 
+    save_connection2 : function(req, res) {
+        var js = req.body;//json body
+       
+        var savedata = new ConnModel(js).save(function(err, result) {
+            if (err) throw err;
+
+            if(result) {
+                res.json(result)
+            }
+        })
+    },
+
     find_connection : function(req, res) {
         var query = req.params.query;
 

@@ -1,9 +1,13 @@
 var cache = require('memory-cache');
-
+var db = require("./db.js");
 
 module.exports = { 
 
     load_queue : function() {
+
+        //get connections from db
+        var res;
+        //db.find_connection_all(null, res);  
 
         //cache JSON
         var str = '{ "name": "connector 1", "timeinterval": 10 }';
@@ -13,8 +17,8 @@ module.exports = {
         var jar = [];
         jar.push(JSON.parse(str));
         jar.push(JSON.parse(str2));
-        jar.push(JSON.parse(str3));
-        jar.push(JSON.parse(str4));
+        //jar.push(JSON.parse(str3));
+        //jar.push(JSON.parse(str4));
 
         var obj = JSON.parse(str);
         cache.put('minute-queue', jar);

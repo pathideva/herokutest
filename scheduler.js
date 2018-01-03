@@ -11,16 +11,16 @@ var express = require("express");
 var app = express();
 
 // then access the current Queue
-var jobs = kue.createQueue({
-    prefix: 'h'
-    , redis: {
-    port: 47269
-    , host: 'ec2-35-168-41-119.compute-1.amazonaws.com' //example
-    , auth: 'p22e1ac9a145e7f24ee7fc7f4ba4bcdcb2ffc05716a0c7a170e2744d8acab8031'
-    , db: 'noakue', // if provided select a non-default redis db
-    }
-    });
-//var jobs = kue.createQueue();
+// var jobs = kue.createQueue({
+//     prefix: 'h'
+//     , redis: {
+//     port: 47269
+//     , host: 'ec2-35-168-41-119.compute-1.amazonaws.com' //example
+//     , auth: 'p22e1ac9a145e7f24ee7fc7f4ba4bcdcb2ffc05716a0c7a170e2744d8acab8031'
+//     , db: 'noakue', // if provided select a non-default redis db
+//     }
+//     });
+var jobs = kue.createQueue();
 
 jobs.process('minute_tasks', function(job, done) { 
     console.log('Worker job running.'); 
@@ -30,7 +30,7 @@ jobs.process('minute_tasks', function(job, done) {
 
 module.exports = { 
     
-    agendatest : function() { 
+    initSchedule : function() { 
 
         //load queues
         que.load_queue();
@@ -77,15 +77,7 @@ module.exports = {
             agenda.start();
         });
 
-       
-        // wire up Kue (see /active for queue interface)
-        // app.use(kue.app);
-
-        // app.listen(3000);
-        // console.log("Express server listening on port %d in %s mode", process.env.PORT, app.settings.env);
     
-
-
         return;
     },
 
